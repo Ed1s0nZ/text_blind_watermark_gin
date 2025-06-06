@@ -1,7 +1,7 @@
 # 文本暗水印工具
 
 一个基于零宽字符的文本暗水印工具，支持中文水印的添加和提取。该工具提供了Web界面和命令行两种使用方式。   
-视频介绍   
+## 视频介绍   
 
 https://github.com/user-attachments/assets/be472832-5e9a-447f-8d2b-5cc5c0c8f61f
 
