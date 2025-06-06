@@ -1,8 +1,10 @@
 # 文本暗水印工具
 
 一个基于零宽字符的文本暗水印工具，支持中文水印的添加和提取。该工具提供了Web界面和命令行两种使用方式。   
- 
- [介绍](https://github.com/Ed1s0nZ/text_blind_watermark_gin/blob/main/image/%E8%A7%86%E9%A2%91%E7%AE%80%E4%BB%8B.mp4)
+ <video width="640" height="360" controls>
+    <source src="https://github.com/Ed1s0nZ/text_blind_watermark_gin/blob/main/image/%E8%A7%86%E9%A2%91%E7%AE%80%E4%BB%8B.mp4" type="video/mp4">
+    Your browser does not support the video tag.   
+</video>
 ## 功能特点
 
 - 支持中文水印
