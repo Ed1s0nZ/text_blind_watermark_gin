@@ -27,8 +27,9 @@ go mod tidy
 ```bash
 go run cmd/server/main.go
 ```
-
 2. 在浏览器中访问：http://localhost:8080
+   
+<img src="https://github.com/Ed1s0nZ/text_blind_watermark_gin/blob/main/image/web.png">  
 
 ### 命令行工具
 
