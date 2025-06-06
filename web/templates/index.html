@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本暗水印工具</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .input-field {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+        .input-field:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+        }
+        .copy-btn {
+            transition: all 0.2s ease;
+        }
+        .copy-btn:hover {
+            transform: scale(1.05);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12 animate-fade-in">
+            <h1 class="text-4xl font-extrabold text-white mb-4">
+                <i class="fas fa-fingerprint mr-3"></i>文本暗水印工具
+            </h1>
+            <p class="text-xl text-white opacity-90">安全、隐蔽的文本水印解决方案</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- 加密部分 -->
+            <div class="glass-card rounded-2xl p-8 animate-fade-in" style="animation-delay: 0.1s">
+                <div class="flex items-center mb-6">
+                    <i class="fas fa-lock text-2xl text-indigo-600 mr-3"></i>
+                    <h2 class="text-2xl font-bold text-gray-800">添加水印</h2>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">原始文本</label>
+                        <div class="relative">
+                            <textarea id="originalText" class="input-field w-full h-40 p-4 rounded-xl resize-none" 
+                                placeholder="请输入需要添加水印的文本..."></textarea>
+                            <button onclick="copyText('originalText')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">水印内容</label>
+                        <div class="relative">
+                            <input type="text" id="watermark" class="input-field w-full p-4 rounded-xl" 
+                                placeholder="请输入水印内容...">
+                            <button onclick="copyText('watermark')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="encode()" class="btn-primary w-full py-4 px-6 rounded-xl text-white font-semibold flex items-center justify-center">
+                        <i class="fas fa-magic mr-2"></i>
+                        生成带水印文本
+                    </button>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">结果</label>
+                        <div class="relative">
+                            <textarea id="encodedResult" class="input-field w-full h-40 p-4 rounded-xl bg-gray-50" readonly></textarea>
+                            <button onclick="copyText('encodedResult')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 解密部分 -->
+            <div class="glass-card rounded-2xl p-8 animate-fade-in" style="animation-delay: 0.2s">
+                <div class="flex items-center mb-6">
+                    <i class="fas fa-unlock text-2xl text-blue-600 mr-3"></i>
+                    <h2 class="text-2xl font-bold text-gray-800">提取水印</h2>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">带水印文本</label>
+                        <div class="relative">
+                            <textarea id="encodedText" class="input-field w-full h-40 p-4 rounded-xl resize-none" 
+                                placeholder="请输入带水印的文本..."></textarea>
+                            <button onclick="copyText('encodedText')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button onclick="decode()" class="btn-secondary w-full py-4 px-6 rounded-xl text-white font-semibold flex items-center justify-center">
+                        <i class="fas fa-search mr-2"></i>
+                        提取水印
+                    </button>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">提取的水印</label>
+                        <div class="relative">
+                            <textarea id="decodedResult" class="input-field w-full h-40 p-4 rounded-xl bg-gray-50" readonly></textarea>
+                            <button onclick="copyText('decodedResult')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function encode() {
+            const text = document.getElementById('originalText').value;
+            const watermark = document.getElementById('watermark').value;
+            
+            if (!text || !watermark) {
+                showToast('请填写完整信息');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/encode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text, watermark }),
+                });
+                
+                const data = await response.json();
+                document.getElementById('encodedResult').value = data.result;
+                showToast('水印添加成功！');
+            } catch (error) {
+                showToast('加密失败：' + error.message);
+            }
+        }
+
+        async function decode() {
+            const text = document.getElementById('encodedText').value;
+            
+            if (!text) {
+                showToast('请输入带水印的文本');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/decode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text }),
+                });
+                
+                const data = await response.json();
+                document.getElementById('decodedResult').value = data.result;
+                showToast('水印提取成功！');
+            } catch (error) {
+                showToast('解密失败：' + error.message);
+            }
+        }
+
+        function copyText(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            document.execCommand('copy');
+            showToast('复制成功！');
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out';
+            toast.style.zIndex = '1000';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 2000);
+        }
+    </script>
+</body>
+</html> 
