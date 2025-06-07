@@ -39,7 +39,7 @@ func main() {
 		}
 
 		// 添加水印
-		encoded := watermark.Encode(string(content), watermarkText)
+		encoded := watermark.Encode(string(content), watermarkText, "")
 
 		// 写入输出文件
 		err = ioutil.WriteFile(outputFile, []byte(encoded), 0644)
@@ -66,7 +66,7 @@ func main() {
 		}
 
 		// 提取水印
-		decoded := watermark.Decode(string(content))
+		decoded := watermark.Decode(string(content), nil)
 
 		// 写入输出文件
 		err = ioutil.WriteFile(outputFile, []byte(decoded), 0644)

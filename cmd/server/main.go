@@ -37,13 +37,14 @@ func main() {
 			var req struct {
 				Text      string `json:"text"`
 				Watermark string `json:"watermark"`
+				IpAddress string `json:"ipAddress"`
 			}
 			if err := c.ShouldBindJSON(&req); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
 
-			encoded := watermark.Encode(req.Text, req.Watermark)
+			encoded := watermark.Encode(req.Text, req.Watermark, req.IpAddress)
 			c.JSON(http.StatusOK, gin.H{"result": encoded})
 		})
 
@@ -56,7 +57,7 @@ func main() {
 				return
 			}
 
-			decoded := watermark.Decode(req.Text)
+			decoded := watermark.Decode(req.Text, c)
 			c.JSON(http.StatusOK, gin.H{"result": decoded})
 		})
 	}

@@ -6,6 +6,8 @@
     <title>文本暗水印工具</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -57,7 +59,7 @@
     </style>
 </head>
 <body class="py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
+    <div id="app"  class="max-w-7xl mx-auto">
         <div class="text-center mb-12 animate-fade-in">
             <h1 class="text-4xl font-extrabold text-white mb-4">
                 <i class="fas fa-fingerprint mr-3"></i>文本暗水印工具
@@ -76,32 +78,43 @@
                     <div>
                         <label class="block text-gray-700 font-medium mb-2">原始文本</label>
                         <div class="relative">
-                            <textarea id="originalText" class="input-field w-full h-40 p-4 rounded-xl resize-none" 
+                            <textarea id="originalText" v-model ="encodeParam.originalText" class="input-field w-full h-40 p-4 rounded-xl resize-none" 
                                 placeholder="请输入需要添加水印的文本..."></textarea>
-                            <button onclick="copyText('originalText')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
-                                <i class="fas fa-copy"></i>
-                            </button>
                         </div>
                     </div>
                     <div>
                         <label class="block text-gray-700 font-medium mb-2">水印内容</label>
                         <div class="relative">
-                            <input type="text" id="watermark" class="input-field w-full p-4 rounded-xl" 
+                            <input type="text" id="watermark" v-model ="encodeParam.watermark" class="input-field w-full p-4 rounded-xl" 
                                 placeholder="请输入水印内容...">
-                            <button onclick="copyText('watermark')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
+                            <button @click="copyText(encodeParam.watermark)" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
                     </div>
-                    <button onclick="encode()" class="btn-primary w-full py-4 px-6 rounded-xl text-white font-semibold flex items-center justify-center">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <label class="text-gray-700 font-medium">允许的IP地址</label>
+                            <el-switch
+                                v-model="enableIP"
+                                active-color="#13ce66"
+                                inactive-color="#ff4949">
+                            </el-switch>
+                        </div>
+                        <div v-if="enableIP" class="relative">
+                            <input type="text" v-model="encodeParam.ipAddress" class="input-field w-full p-4 rounded-xl"
+                                placeholder="请输入允许访问的IP地址...">
+                        </div>
+                    </div>
+                    <button @click="encode" class="btn-primary w-full py-4 px-6 rounded-xl text-white font-semibold flex items-center justify-center">
                         <i class="fas fa-magic mr-2"></i>
                         生成带水印文本
                     </button>
                     <div>
                         <label class="block text-gray-700 font-medium mb-2">结果</label>
                         <div class="relative">
-                            <textarea id="encodedResult" class="input-field w-full h-40 p-4 rounded-xl bg-gray-50" readonly></textarea>
-                            <button onclick="copyText('encodedResult')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
+                            <textarea id="encodedResult" v-model="encodeResult" class="input-field w-full h-40 p-4 rounded-xl bg-gray-50" readonly></textarea>
+                            <button @click="copyText(encodeResult)"  class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
@@ -119,22 +132,22 @@
                     <div>
                         <label class="block text-gray-700 font-medium mb-2">带水印文本</label>
                         <div class="relative">
-                            <textarea id="encodedText" class="input-field w-full h-40 p-4 rounded-xl resize-none" 
+                            <textarea id="encodedText" v-model="inputEncodedText" class="input-field w-full h-40 p-4 rounded-xl resize-none" 
                                 placeholder="请输入带水印的文本..."></textarea>
-                            <button onclick="copyText('encodedText')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
+                            <button @click="copyText(inputEncodedText)" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
                     </div>
-                    <button onclick="decode()" class="btn-secondary w-full py-4 px-6 rounded-xl text-white font-semibold flex items-center justify-center">
+                    <button @click="decode" class="btn-secondary w-full py-4 px-6 rounded-xl text-white font-semibold flex items-center justify-center">
                         <i class="fas fa-search mr-2"></i>
                         提取水印
                     </button>
                     <div>
                         <label class="block text-gray-700 font-medium mb-2">提取的水印</label>
                         <div class="relative">
-                            <textarea id="decodedResult" class="input-field w-full h-40 p-4 rounded-xl bg-gray-50" readonly></textarea>
-                            <button onclick="copyText('decodedResult')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
+                            <textarea id="decodedResult" v-model="decodeResult" class="input-field w-full h-40 p-4 rounded-xl bg-gray-50" readonly></textarea>
+                            <button @click="copyText('decodeResult')" class="copy-btn absolute top-2 right-2 p-2 text-gray-500 hover:text-indigo-600">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
@@ -144,80 +157,104 @@
         </div>
     </div>
 
-    <script>
-        async function encode() {
-            const text = document.getElementById('originalText').value;
-            const watermark = document.getElementById('watermark').value;
+    <!-- import Vue before Element -->
+  <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+  <!-- import JavaScript -->
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script>    
+    var app = new Vue({
+		el: "#app",
+		components: {
+        },
+		data() {
+			return {
+                enableIP: false,
+                encodeParam : {
+                    originalText: '',
+                    watermark: '',
+                    ipAddress: ''
+                },
+                encodeResult: '',
+                decodeResult: '',
+                inputEncodedText: ''
+			}
+		},
+		methods: {
+            async encode() {
+                const text = this.encodeParam.originalText
+                const watermark = this.encodeParam.watermark
+                const ipAddress = this.encodeParam.ipAddress
+                console.log("数据：" +  text + "   " + watermark + "    " + ipAddress)
+                if (!text || !watermark) {
+                    showToast('请填写完整信息');
+                    return;
+                }
             
-            if (!text || !watermark) {
-                showToast('请填写完整信息');
-                return;
-            }
+                try {
+                    const response = await fetch('/api/encode', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text, watermark, ipAddress }),
+                    });
+                    const data = response.json()
+                    data.then((data) => {
+                        this.encodeResult = data.result;
+                    })
+                    this.$message({
+                        message: '水印添加成功',
+                        type: 'success'
+                    })
+                } catch (error) {
+                    this.$message.error('加密失败：' + error.message);
+                }
+            },
+            async decode() {
+                const text = document.getElementById('encodedText').value;
             
-            try {
-                const response = await fetch('/api/encode', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ text, watermark }),
-                });
+                if (!text) {
+                    this.$message({
+                        message: '请输入带水印的文本',
+                        type: 'warning'
+                    })
+                    return;
+                }
+            
+                try {
+                    const response = await fetch('/api/decode', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ text }),
+                    });
                 
-                const data = await response.json();
-                document.getElementById('encodedResult').value = data.result;
-                showToast('水印添加成功！');
-            } catch (error) {
-                showToast('加密失败：' + error.message);
-            }
-        }
-
-        async function decode() {
-            const text = document.getElementById('encodedText').value;
-            
-            if (!text) {
-                showToast('请输入带水印的文本');
-                return;
-            }
-            
-            try {
-                const response = await fetch('/api/decode', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ text }),
-                });
-                
-                const data = await response.json();
-                document.getElementById('decodedResult').value = data.result;
-                showToast('水印提取成功！');
-            } catch (error) {
-                showToast('解密失败：' + error.message);
-            }
-        }
-
-        function copyText(elementId) {
-            const element = document.getElementById(elementId);
-            element.select();
-            document.execCommand('copy');
-            showToast('复制成功！');
-        }
-
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out';
-            toast.style.zIndex = '1000';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    document.body.removeChild(toast);
-                }, 300);
-            }, 2000);
-        }
+                    const data = response.json();
+                    data.then((data) => {
+                        this.decodeResult = data.result;
+                    })
+                    this.$message({
+                        message: '水印提取成功！',
+                        type: 'success'
+                    })
+                } catch (error) {
+                    this.$message.error('解密失败：' + error.message);
+                }
+            },
+            async copyText(value) {
+                try {
+                    await navigator.clipboard.writeText(value);
+                    this.$message({
+                    message: '复制成功！',
+                    type: 'success'
+                    })
+                } catch (err) {
+                    this.$message.error('复制失败！');
+                }
+            },
+		}
+	});
     </script>
 </body>
-</html> 
+</html>
